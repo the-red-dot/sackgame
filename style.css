@@ -19,6 +19,7 @@ header {
     background-color: #4CAF50;
     padding: 15px 0;
     color: white;
+    text-align: center;
 }
 
 header h1 {
@@ -31,6 +32,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
 .controls {
@@ -94,7 +96,7 @@ main {
 .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 10px;
+    grid-gap: 5px;
     width: 100%;
     max-width: 300px;
     margin-bottom: 15px;
@@ -102,7 +104,7 @@ main {
 
 .door {
     width: 100%;
-    padding-top: 133%; /* יחס גובה לרוחב 4:3 */
+    padding-top: 100%; /* יחס גובה לרוחב 1:1 */
     background-color: #8B4513;
     border: 2px solid #654321;
     border-radius: 8px;
@@ -156,10 +158,11 @@ main {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
-    max-height: 250px;
+    max-height: 200px;
     overflow-y: auto;
     text-align: left;
     direction: ltr;
+    font-size: 0.9rem;
 }
 
 footer {
@@ -177,20 +180,11 @@ footer {
     }
 
     .controls, .grid, .status, .log {
-        max-width: 90%;
+        max-width: 95%;
     }
 
-    .select-group label {
-        font-size: 0.9rem;
-    }
-
-    .select-group select {
-        font-size: 0.9rem;
-    }
-
-    .btn {
-        font-size: 0.9rem;
-        padding: 6px 12px;
+    .door {
+        padding-top: 85%; /* קטין את הדלתות בטלפונים ניידים */
     }
 
     .door::after {
@@ -202,6 +196,6 @@ footer {
     }
 
     .log {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 }
