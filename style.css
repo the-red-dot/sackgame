@@ -143,6 +143,51 @@ main {
     background-color: #FF8C00;
 }
 
+.change-view {
+    background-color: #1E90FF; /* DodgerBlue color for change view button */
+}
+
+.change-view:hover {
+    background-color: #1C86EE;
+}
+
+/* Arrow Buttons */
+.arrow-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 5px;
+    background-color: #808080; /* Gray color when disabled */
+    color: white;
+    cursor: not-allowed;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.arrow.enabled {
+    background-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.arrow.enabled:hover {
+    background-color: var(--primary-hover);
+}
+
+.arrow.enabled:active {
+    transform: scale(0.98);
+}
+
 /* Grid Section */
 .grid {
     display: grid;
@@ -150,6 +195,14 @@ main {
     grid-gap: 10px;
     width: 100%;
     max-width: 450px;
+    transition: all 0.3s ease;
+}
+
+/* Single-Line Layout */
+.grid.single-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .door {
@@ -202,6 +255,15 @@ main {
     width: 100%;
     max-width: 450px;
     text-align: center;
+}
+
+.status p {
+    margin-bottom: 5px;
+}
+
+#attempts {
+    font-weight: bold;
+    color: var(--accent-color);
 }
 
 /* Log Section */
@@ -267,6 +329,13 @@ footer {
         font-size: 0.85rem;
         max-height: 180px;
     }
+
+    /* Adjust arrow button size on smaller screens */
+    .arrow {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -289,5 +358,12 @@ footer {
 
     .log {
         max-height: 160px;
+    }
+
+    /* Further adjust arrow button size on extra small screens */
+    .arrow {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
     }
 }

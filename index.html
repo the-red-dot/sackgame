@@ -35,6 +35,12 @@
             <div class="button-group">
                 <button id="startBtn" class="btn">התחל משחק</button>
                 <button id="revealBtn" class="btn reveal" style="display:none;">חשוף למשך 2 שניות</button>
+                <button id="changeViewBtn" class="btn change-view">שנה תצוגה</button>
+                <!-- Added Arrow Buttons -->
+                <div class="arrow-buttons">
+                    <button id="leftArrowBtn" class="btn arrow left-arrow" disabled>←</button>
+                    <button id="rightArrowBtn" class="btn arrow right-arrow" disabled>→</button>
+                </div>
             </div>
         </section>
         
@@ -50,7 +56,10 @@
             <div class="door" data-door="9">9</div>
         </section>
         
-        <section id="status" class="status">בחר התחלה כדי להתחיל את המשחק.</section>
+        <section id="status" class="status">
+            <p id="statusMessage">בחר התחלה כדי להתחיל את המשחק.</p>
+            <p id="attempts">ניסיונות: 0</p>
+        </section>
         <section id="log" class="log"></section>
         <button id="resetBtn" class="btn reset" style="display:none;">אתחול משחק</button>
     </main>

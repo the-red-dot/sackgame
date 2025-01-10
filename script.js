@@ -1,32 +1,45 @@
 document.addEventListener('DOMContentLoaded', () => {
     const doors = document.querySelectorAll('.door');
-    const statusDiv = document.getElementById('status');
+    const statusMessage = document.getElementById('statusMessage');
+    const attemptsDiv = document.getElementById('attempts');
     const logDiv = document.getElementById('log');
     const knownPositionSelect = document.getElementById('knownPositionSelect');
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
     const revealBtn = document.getElementById('revealBtn');
+    const changeViewBtn = document.getElementById('changeViewBtn');
+    const gridSection = document.querySelector('.grid');
+
+    // Arrow Buttons
+    const leftArrowBtn = document.getElementById('leftArrowBtn');
+    const rightArrowBtn = document.getElementById('rightArrowBtn');
 
     let gameActive = false;
     let computerPosition = null; // Internal tracking
     let revealTimeout = null;
+    let isGridView = true; // Tracks the current view state
+    let attemptsCount = 0; // Initialize attempt counter
 
     // Update Status Display
     function updateStatus() {
         if (!gameActive) {
-            statusDiv.textContent = 'בחר התחלה כדי להתחיל את המשחק.';
+            statusMessage.textContent = 'בחר התחלה כדי להתחיל את המשחק.';
             return;
         }
-        // In known mode, display computer's position
         const isKnownMode = knownPositionSelect.value !== 'unknown';
         if (isKnownMode && computerPosition !== null) {
             const moves = getPossibleMoves(computerPosition);
             const moveText = Array.from(moves).sort((a, b) => a - b).join(' או ');
-            statusDiv.textContent = `מיקום השק: דלת ${computerPosition} | השק יכול לנוע לדלת ${moveText}`;
+            statusMessage.textContent = `מיקום השק: דלת ${computerPosition} | השק יכול לנוע לדלת ${moveText}`;
         } else if (computerPosition !== null) {
             // Unknown mode
-            statusDiv.textContent = `השק נמצא בדלת כלשהי.`;
+            statusMessage.textContent = `השק נמצא בדלת כלשהי.`;
         }
+    }
+
+    // Update Attempts Display
+    function updateAttempts() {
+        attemptsDiv.textContent = `ניסיונות: ${attemptsCount}`;
     }
 
     // Add Message to Log
@@ -80,10 +93,18 @@ document.addEventListener('DOMContentLoaded', () => {
         logDiv.innerHTML = '';
         updateDoors();
         updateStatus();
+        attemptsCount = 0; // Reset attempts counter
+        updateAttempts();
         knownPositionSelect.value = "";
         resetBtn.style.display = 'none';
         startBtn.style.display = 'inline-block';
         revealBtn.style.display = 'none';
+        leftArrowBtn.disabled = true;
+        rightArrowBtn.disabled = true;
+        leftArrowBtn.classList.remove('enabled');
+        rightArrowBtn.classList.remove('enabled');
+        leftArrowBtn.dataset.target = '';
+        rightArrowBtn.dataset.target = '';
         if (revealTimeout) {
             clearTimeout(revealTimeout);
             revealTimeout = null;
@@ -125,6 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.style.display = 'none';
         resetBtn.style.display = 'inline-block';
         revealBtn.style.display = 'inline-block';
+        attemptsCount = 0; // Reset attempts counter
+        updateAttempts();
+        updateArrows();
     });
 
     // Get a random door number between 1 and 9
@@ -142,8 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
             updateStatus();
             addLog('המשחק הסתיים.');
             revealBtn.style.display = 'none';
+            leftArrowBtn.disabled = true;
+            rightArrowBtn.disabled = true;
+            leftArrowBtn.classList.remove('enabled');
+            rightArrowBtn.classList.remove('enabled');
             return;
         }
+
+        // Increment attempts for clicking a door
+        attemptsCount++;
+        updateAttempts();
 
         // The sack moves based on rules
         addLog(`לחצת על דלת ${pressedDoor}. השק לא נפל.`);
@@ -154,6 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateStatus();
             addLog('המשחק הסתיים.');
             revealBtn.style.display = 'none';
+            leftArrowBtn.disabled = true;
+            rightArrowBtn.disabled = true;
+            leftArrowBtn.classList.remove('enabled');
+            rightArrowBtn.classList.remove('enabled');
             return;
         }
 
@@ -165,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addLog(`השק זז לדלת ${computerPosition}.`);
         updateDoors();
         updateStatus();
+        updateArrows();
     }
 
     // Event Listener for Door Clicks
@@ -192,14 +229,111 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentDoor) {
             currentDoor.classList.add('revealed');
 
-            // Remove the highlight after 5 seconds
+            // Remove the highlight after 2 seconds
             revealBtn.disabled = true; // Disable button to prevent multiple clicks
             revealTimeout = setTimeout(() => {
                 currentDoor.classList.remove('revealed');
                 revealBtn.disabled = false;
-            }, 2000);
+            }, 2000); // 2 seconds as per latest requirement
         }
     });
+
+    // Event Listener for Change View Button
+    changeViewBtn.addEventListener('click', () => {
+        if (isGridView) {
+            // Switch to single-line view
+            gridSection.classList.add('single-line');
+            changeViewBtn.textContent = 'שנה לתצוגת רשת';
+            isGridView = false;
+        } else {
+            // Switch back to grid view
+            gridSection.classList.remove('single-line');
+            changeViewBtn.textContent = 'שנה תצוגה';
+            isGridView = true;
+        }
+    });
+
+    // Function to Update Arrow Buttons Based on Current Position
+    function updateArrows() {
+        if (!gameActive || computerPosition === null) {
+            // Disable all arrows
+            leftArrowBtn.disabled = true;
+            rightArrowBtn.disabled = true;
+            leftArrowBtn.classList.remove('enabled');
+            rightArrowBtn.classList.remove('enabled');
+            leftArrowBtn.dataset.target = '';
+            rightArrowBtn.dataset.target = '';
+            return;
+        }
+
+        const possibleMoves = getPossibleMoves(computerPosition);
+        if (possibleMoves.length === 0) {
+            // No moves available
+            leftArrowBtn.disabled = true;
+            rightArrowBtn.disabled = true;
+            leftArrowBtn.classList.remove('enabled');
+            rightArrowBtn.classList.remove('enabled');
+            leftArrowBtn.dataset.target = '';
+            rightArrowBtn.dataset.target = '';
+            return;
+        }
+
+        if (possibleMoves.length === 1) {
+            // Only one possible move, assign to left arrow
+            leftArrowBtn.disabled = false;
+            leftArrowBtn.classList.add('enabled');
+            leftArrowBtn.dataset.target = possibleMoves[0];
+            rightArrowBtn.disabled = true;
+            rightArrowBtn.classList.remove('enabled');
+            rightArrowBtn.dataset.target = '';
+        } else if (possibleMoves.length === 2) {
+            // Two possible moves, assign left and right arrows
+            leftArrowBtn.disabled = false;
+            leftArrowBtn.classList.add('enabled');
+            leftArrowBtn.dataset.target = possibleMoves[0];
+            rightArrowBtn.disabled = false;
+            rightArrowBtn.classList.add('enabled');
+            rightArrowBtn.dataset.target = possibleMoves[1];
+        }
+    }
+
+    // Event Listeners for Arrow Buttons
+    leftArrowBtn.addEventListener('click', () => {
+        if (leftArrowBtn.disabled) return;
+        const targetDoor = parseInt(leftArrowBtn.dataset.target);
+        moveSack(targetDoor, 'left');
+    });
+
+    rightArrowBtn.addEventListener('click', () => {
+        if (rightArrowBtn.disabled) return;
+        const targetDoor = parseInt(rightArrowBtn.dataset.target);
+        moveSack(targetDoor, 'right');
+    });
+
+    // Function to Move the Sack Manually
+    function moveSack(targetDoor, direction) {
+        if (!gameActive || computerPosition === null) return;
+
+        const possibleMoves = getPossibleMoves(computerPosition);
+        if (!possibleMoves.includes(targetDoor)) {
+            alert('תנועה לא חוקית.');
+            return;
+        }
+
+        // **Removed Attempts Increment Here**
+        // Previously, attempts were being incremented here for arrow clicks.
+        // Since the user doesn't want arrow movements to count as attempts,
+        // the following lines are removed:
+        // attemptsCount++;
+        // updateAttempts();
+
+        // Move the sack
+        computerPosition = targetDoor;
+        addLog(`השק זז ידנית לדלת ${computerPosition} (${direction}-arrow).`);
+        updateDoors();
+        updateStatus();
+        updateArrows();
+    }
 
     // Initialize Game
     resetGame();
