@@ -98,6 +98,15 @@ main {
     outline: none;
 }
 
+/* Button Group */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Buttons */
 .btn {
     padding: 10px 20px;
     font-size: 0.95rem;
@@ -126,6 +135,14 @@ main {
     background-color: var(--secondary-hover);
 }
 
+.reveal {
+    background-color: #FFA500; /* Orange color for reveal button */
+}
+
+.reveal:hover {
+    background-color: #FF8C00;
+}
+
 /* Grid Section */
 .grid {
     display: grid;
@@ -137,7 +154,7 @@ main {
 
 .door {
     position: relative;
-    padding-top: 100%; /* Changed from 133% to 100% for square aspect ratio */
+    padding-top: 100%; /* Square Aspect Ratio */
     background-color: var(--door-color);
     border: 2px solid #654321;
     border-radius: 8px;
@@ -166,6 +183,13 @@ main {
 
 .door.known {
     background-color: var(--known-color);
+}
+
+/* Revealed Door Styling */
+.door.revealed {
+    box-shadow: 0 0 0 4px var(--accent-color);
+    transform: scale(1.1);
+    transition: box-shadow 0.3s, transform 0.3s;
 }
 
 /* Status Section */
