@@ -12,54 +12,51 @@ body {
     direction: rtl;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh; /* Use full height of the viewport */
-    margin: 0;
+    height: 100vh; /* Full height of the viewport */
+    overflow: hidden; /* Prevent scrolling */
 }
 
 header {
     background-color: #4CAF50;
-    padding: 10px 0;
+    padding: 10px;
     color: white;
     text-align: center;
-    width: 100%;
+    flex-shrink: 0; /* Prevent shrinking of the header */
 }
 
 header h1 {
     font-size: 1.8rem;
+    margin: 0;
 }
 
 main {
+    flex: 1; /* Use all available space between header and footer */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    height: 100%; /* Fill the remaining height */
+    justify-content: space-evenly; /* Space out elements evenly */
     padding: 10px;
-    box-sizing: border-box;
 }
 
 .controls {
-    width: 90%; /* Stretch controls across the screen */
+    width: 90%;
+    max-width: 400px;
     background: #fff;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 .select-group {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     margin-bottom: 10px;
 }
 
 .select-group label {
     font-size: 1rem;
     margin-bottom: 5px;
+    display: block;
 }
 
 .select-group select {
@@ -72,7 +69,7 @@ main {
 
 .btn {
     width: 100%;
-    padding: 10px 0;
+    padding: 10px;
     font-size: 1rem;
     margin-top: 10px;
     border: none;
@@ -97,17 +94,16 @@ main {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
-    width: 100%;
-    max-width: 350px; /* Max width for larger screens */
-    height: 100%; /* Use remaining height */
-    flex-grow: 1;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
+    gap: 10px;
+    width: 90%;
+    max-width: 400px;
+    flex-grow: 1; /* Let the grid expand to fill vertical space */
 }
 
 .door {
     width: 100%;
-    padding-top: 100%; /* Maintain square aspect ratio */
+    padding-top: 100%; /* Square aspect ratio */
     background-color: #8B4513;
     border: 2px solid #654321;
     border-radius: 8px;
@@ -138,22 +134,25 @@ main {
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: bold;
 }
 
 .status {
     width: 90%;
-    font-size: 1rem;
+    max-width: 400px;
     background: #fff;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .log {
     width: 90%;
+    max-width: 400px;
     background: #fff;
     padding: 10px;
     border-radius: 8px;
@@ -163,6 +162,7 @@ main {
     text-align: left;
     direction: ltr;
     font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
 footer {
@@ -171,23 +171,26 @@ footer {
     padding: 5px 0;
     text-align: center;
     font-size: 0.8rem;
-    width: 100%;
+    flex-shrink: 0;
 }
 
 /* רספונסיביות */
 @media (max-width: 600px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
     .grid {
-        max-width: 95%; /* Use more screen width on smaller screens */
-        gap: 5px; /* Reduce gaps for tighter layout */
+        max-width: 100%; /* Use full width of the screen */
+        gap: 5px; /* Reduce gaps */
     }
 
     .door {
-        padding-top: 95%; /* Slightly larger doors to better fit screen */
-        font-size: 1.2rem; /* Larger numbers */
+        padding-top: 100%; /* Maintain square doors */
+        font-size: 1.2rem;
     }
 
-    .status, .log, .controls {
-        max-width: 95%; /* Expand sections to fit screen width */
-        font-size: 1rem;
+    .controls, .status, .log {
+        max-width: 100%; /* Expand to fill width */
     }
 }
