@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameActive = false;
     let knownPosition = null;
 
-    // פונקציה לעדכון תצוגת המיקומים
+    // Update Status Display
     function updateStatus() {
         if (!gameActive) {
             statusDiv.textContent = 'בחר התחלה כדי להתחיל את המשחק.';
@@ -17,18 +17,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (knownPosition !== null) {
             const moves = getPossibleMoves(knownPosition);
-            statusDiv.textContent = `מיקום השק: דלת ${knownPosition} | השק יכול לנוע לדלת ${Array.from(moves).sort((a, b) => a - b).join(' או ')}`;
+            const moveText = Array.from(moves).sort((a, b) => a - b).join(' או ');
+            statusDiv.textContent = `מיקום השק: דלת ${knownPosition} | השק יכול לנוע לדלת ${moveText}`;
         }
     }
 
-    // פונקציה להוספת הודעות ללוג
+    // Add Message to Log
     function addLog(message) {
         const p = document.createElement('p');
         p.textContent = message;
         logDiv.prepend(p);
     }
 
-    // פונקציה לקבלת מיקומים אפשריים להגעה
+    // Get Possible Moves
     function getPossibleMoves(position) {
         const moves = [];
         if (position > 1) moves.push(position - 1);
@@ -36,18 +37,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return moves;
     }
 
-    // פונקציה לעדכון הדלתות
+    // Update Doors Display
     function updateDoors() {
         doors.forEach(door => {
             const doorNumber = parseInt(door.getAttribute('data-door'));
             door.classList.remove('fallen', 'known');
+            const icon = door.querySelector('i');
             if (doorNumber === knownPosition) {
                 door.classList.add('known');
+                if (icon) icon.classList.remove('fa-door-closed');
+            } else {
+                if (icon) icon.classList.add('fa-door-closed');
             }
         });
     }
 
-    // פונקציה לאתחול המשחק
+    // Reset Game
     function resetGame() {
         gameActive = false;
         knownPosition = null;
@@ -59,12 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.style.display = 'inline-block';
     }
 
-    // אירוע לחיצה על כפתור אתחול
+    // Event Listener for Reset Button
     resetBtn.addEventListener('click', () => {
         resetGame();
     });
 
-    // אירוע לחיצה על כפתור התחלה
+    // Event Listener for Start Button
     startBtn.addEventListener('click', () => {
         const selected = parseInt(knownPositionSelect.value);
         if (isNaN(selected)) {
@@ -82,21 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
         resetBtn.style.display = 'inline-block';
     });
 
-    // פונקציה לעדכון המיקומים האפשריים לאחר לחיצה
+    // Update Positions After Door Click
     function updatePossiblePositionsAfterClick(pressedDoor) {
         if (pressedDoor === knownPosition) {
-            // השק נפל
+            // The sack has fallen
             addLog(`לחצת על דלת ${pressedDoor}. השק נפל!`);
             doors.forEach(d => d.classList.add('fallen'));
             gameActive = false;
             updateStatus();
+            addLog('המשחק הסתיים.');
         } else {
-            // השק זז
+            // The sack moves
             addLog(`לחצת על דלת ${pressedDoor}. השק לא נפל.`);
             const moves = getPossibleMoves(knownPosition);
             addLog(`השק יכול לנוע לדלת ${moves.sort((a, b) => a - b).join(' או ')}`);
 
-            // בחירה אקראית בין האפשרויות
+            // Randomly choose the next position
             if (moves.length > 0) {
                 const randomIndex = Math.floor(Math.random() * moves.length);
                 knownPosition = moves[randomIndex];
@@ -107,11 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 addLog('אין אפשרויות תנועה נוספות. המשחק מסתיים.');
                 gameActive = false;
                 updateStatus();
+                addLog('המשחק הסתיים.');
             }
         }
     }
 
-    // אירוע לחיצה על דלת
+    // Event Listener for Door Clicks
     doors.forEach(door => {
         door.addEventListener('click', () => {
             if (!gameActive) {
@@ -124,6 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // אתחול המשחק
+    // Initialize Game
     resetGame();
 });
