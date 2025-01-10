@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <title>חידת השק</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>חידת השק</h1>
+    </header>
+    
+    <main>
+        <section class="controls">
+            <div class="select-group">
+                <label for="knownPositionSelect">בחר מיקום ידוע:</label>
+                <select id="knownPositionSelect">
+                    <option value="" disabled selected>בחר דלת</option>
+                    <option value="1">דלת 1</option>
+                    <option value="2">דלת 2</option>
+                    <option value="3">דלת 3</option>
+                    <option value="4">דלת 4</option>
+                    <option value="5">דלת 5</option>
+                    <option value="6">דלת 6</option>
+                    <option value="7">דלת 7</option>
+                    <option value="8">דלת 8</option>
+                    <option value="9">דלת 9</option>
+                </select>
+            </div>
+            <button id="startBtn" class="btn">התחל משחק</button>
+        </section>
+        
+        <section class="grid">
+            <div class="door" data-door="1"></div>
+            <div class="door" data-door="2"></div>
+            <div class="door" data-door="3"></div>
+            <div class="door" data-door="4"></div>
+            <div class="door" data-door="5"></div>
+            <div class="door" data-door="6"></div>
+            <div class="door" data-door="7"></div>
+            <div class="door" data-door="8"></div>
+            <div class="door" data-door="9"></div>
+        </section>
+        
+        <section id="status" class="status">בחר התחלה כדי להתחיל את המשחק.</section>
+        <section id="log" class="log"></section>
+        <button id="resetBtn" class="btn reset" style="display:none;">אתחול משחק</button>
+    </main>
+    
+    <footer>
+        <p>© 2025 חידת השק. כל הזכויות שמורות.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
