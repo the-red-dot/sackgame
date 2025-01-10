@@ -177,25 +177,42 @@ footer {
 @media (max-width: 600px) {
     header h1 {
         font-size: 1.5rem;
+        padding: 10px 0; /* Add padding for better spacing */
     }
 
-    .controls, .grid, .status, .log {
-        max-width: 95%;
+    .controls {
+        padding: 15px; /* Slightly larger padding for touchscreens */
+    }
+
+    .grid {
+        max-width: 90%; /* Make grid use more horizontal space */
+        gap: 8px; /* Increase gap for better spacing */
     }
 
     .door {
-        padding-top: 85%; /* קטין את הדלתות בטלפונים ניידים */
+        padding-top: 90%; /* Slightly larger doors to fill space better */
+        font-size: 1rem; /* Adjust font size inside doors */
     }
 
     .door::after {
-        font-size: 1.2rem;
+        font-size: 1.4rem; /* Make numbers inside doors larger */
     }
 
     .status {
-        font-size: 0.9rem;
+        font-size: 1rem; /* Keep status text slightly larger for readability */
+        padding: 12px; /* Add padding for touchscreens */
+        max-width: 90%; /* Adjust width to match grid width */
     }
 
     .log {
-        font-size: 0.8rem;
+        font-size: 0.85rem; /* Reduce font size slightly for smaller screens */
+        padding: 12px; /* Adjust padding for better alignment */
+        max-width: 90%; /* Ensure consistency with the grid */
+        max-height: 180px; /* Reduce height to avoid excessive scrolling */
+    }
+
+    footer {
+        font-size: 0.75rem; /* Smaller footer text for compact views */
+        padding: 8px 0; /* Adjust footer padding */
     }
 }
