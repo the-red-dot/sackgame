@@ -12,64 +12,64 @@ body {
     direction: rtl;
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Full height of the viewport */
-    overflow: hidden; /* Prevent scrolling */
+    min-height: 100vh;
 }
 
 header {
     background-color: #4CAF50;
-    padding: 10px;
+    padding: 15px 0;
     color: white;
-    text-align: center;
-    flex-shrink: 0; /* Prevent shrinking of the header */
 }
 
 header h1 {
-    font-size: 1.8rem;
-    margin: 0;
+    font-size: 2rem;
+    text-align: center;
 }
 
 main {
-    flex: 1; /* Use all available space between header and footer */
+    flex: 1;
+    padding: 10px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly; /* Space out elements evenly */
-    padding: 10px;
 }
 
 .controls {
-    width: 90%;
-    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
     background: #fff;
-    padding: 10px;
+    padding: 10px 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
+    width: 100%;
+    max-width: 400px;
 }
 
 .select-group {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 10px;
 }
 
 .select-group label {
     font-size: 1rem;
     margin-bottom: 5px;
-    display: block;
 }
 
 .select-group select {
     width: 100%;
-    padding: 8px;
+    padding: 8px 12px;
     font-size: 1rem;
     border-radius: 5px;
     border: 1px solid #ccc;
 }
 
 .btn {
-    width: 100%;
-    padding: 10px;
+    padding: 8px 16px;
     font-size: 1rem;
     margin-top: 10px;
     border: none;
@@ -94,16 +94,16 @@ main {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
-    gap: 10px;
-    width: 90%;
-    max-width: 400px;
-    flex-grow: 1; /* Let the grid expand to fill vertical space */
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 15px;
 }
 
 .door {
     width: 100%;
-    padding-top: 100%; /* Square aspect ratio */
+    padding-top: 133%; /* יחס גובה לרוחב 4:3 */
     background-color: #8B4513;
     border: 2px solid #654321;
     border-radius: 8px;
@@ -139,39 +139,36 @@ main {
 }
 
 .status {
-    width: 90%;
-    max-width: 400px;
+    font-size: 1rem;
+    margin-bottom: 10px;
     background: #fff;
-    padding: 10px;
+    padding: 10px 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
     text-align: center;
-    font-size: 1rem;
-    flex-shrink: 0;
 }
 
 .log {
-    width: 90%;
-    max-width: 400px;
     background: #fff;
-    padding: 10px;
+    padding: 10px 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-height: 150px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 250px;
     overflow-y: auto;
     text-align: left;
     direction: ltr;
-    font-size: 0.9rem;
-    flex-shrink: 0;
 }
 
 footer {
     background-color: #4CAF50;
     color: white;
-    padding: 5px 0;
+    padding: 10px 0;
     text-align: center;
     font-size: 0.8rem;
-    flex-shrink: 0;
 }
 
 /* רספונסיביות */
@@ -180,17 +177,32 @@ footer {
         font-size: 1.5rem;
     }
 
-    .grid {
-        max-width: 100%; /* Use full width of the screen */
-        gap: 5px; /* Reduce gaps */
+    .controls, .grid, .status, .log {
+        max-width: 90%;
     }
 
-    .door {
-        padding-top: 100%; /* Maintain square doors */
+    .select-group label {
+        font-size: 0.9rem;
+    }
+
+    .select-group select {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+
+    .door::after {
         font-size: 1.2rem;
     }
 
-    .controls, .status, .log {
-        max-width: 100%; /* Expand to fill width */
+    .status {
+        font-size: 0.9rem;
+    }
+
+    .log {
+        font-size: 0.9rem;
     }
 }
