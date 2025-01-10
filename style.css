@@ -150,13 +150,9 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.door i {
-    position: absolute;
     font-size: 2rem;
     color: white;
-    transition: transform 0.3s;
+    font-weight: bold;
 }
 
 .door:hover {
@@ -175,22 +171,7 @@ main {
     background-color: var(--known-color);
 }
 
-.door.fallen i, .door.known i {
-    transform: rotateY(180deg);
-}
-
-.door::after {
-    content: attr(data-door);
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    padding: 5px 8px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
+/* Removed .door::after since we no longer need the small white box */
 
 /* Status Section */
 .status {
@@ -258,7 +239,7 @@ footer {
         padding: 10px 20px;
     }
 
-    .door i {
+    .door {
         font-size: 1.8rem;
     }
 
@@ -279,12 +260,7 @@ footer {
 
     .door {
         padding-top: 120%; /* Adjust aspect ratio for smaller screens */
-    }
-
-    .door::after {
-        font-size: 0.8rem;
-        bottom: 5px;
-        right: 5px;
+        font-size: 1.5rem;
     }
 
     .btn {

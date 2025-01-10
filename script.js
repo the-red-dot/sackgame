@@ -42,12 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         doors.forEach(door => {
             const doorNumber = parseInt(door.getAttribute('data-door'));
             door.classList.remove('fallen', 'known');
-            const icon = door.querySelector('i');
             if (doorNumber === knownPosition) {
                 door.classList.add('known');
-                if (icon) icon.classList.remove('fa-door-closed');
-            } else {
-                if (icon) icon.classList.add('fa-door-closed');
             }
         });
     }
