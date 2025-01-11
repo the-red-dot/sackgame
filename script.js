@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // New elements for simulation
     // ===============================
     const simulationPatternTextarea = document.getElementById('simulationPattern');
-    const simulationAttemptLimitInput = document.getElementById('simulationAttemptLimit');
     const runSimulationBtn = document.getElementById('runSimulationBtn');
     const simulationStatusP = document.getElementById('simulationStatus');
     const simulationCounterP = document.getElementById('simulationCounter');
@@ -46,9 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // New simulation variables
     // ===============================
     let simulationActive = false;
-    let simulationCounter = 0; // How many times we've "won" under the attempt limit
-    let simulationAttemptLimit = 17;
     let simulationPattern = [];
+    let simulationIndex = 0; // which door in the pattern we're on
+
+    // Track how many attempts we used in the simulation:
+    let simulationAttemptsCount = 0; 
+    // We'll see if the sack is caught or survives.
 
     // ===============================
     // Functions
@@ -105,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isKnownMode = lastKnownPosition !== 'unknown';
         if (isKnownMode && computerPosition !== null) {
             const moves = getPossibleMoves(computerPosition);
-            const moveText = Array.from(moves).sort((a, b) => a - b).join(' או ');
+            const moveText = moves.sort((a, b) => a - b).join(' או ');
             statusMessage.textContent = `מיקום השק: דלת ${computerPosition} | השק יכול לנוע לדלת ${moveText}`;
         } else if (computerPosition !== null) {
             // Unknown mode
@@ -126,39 +128,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * UPDATED getPossibleMoves:
      * The sack can only move exactly 1 door left or right (if possible).
      */
     function getPossibleMoves(position) {
         const moves = [];
-
-        // If position == 1, can only move to 2
         if (position === 1) {
             if (numberOfDoors > 1) moves.push(2);
             return moves;
         }
-
-        // If position == numberOfDoors, can only move to numberOfDoors - 1
         if (position === numberOfDoors) {
             if (numberOfDoors > 1) moves.push(numberOfDoors - 1);
             return moves;
         }
-
-        // Otherwise, can move to position - 1 and position + 1
         moves.push(position - 1);
         moves.push(position + 1);
-
         return moves;
-    }
-
-    // Check if a number is even
-    function isEven(number) {
-        return number % 2 === 0;
-    }
-
-    // Check if a number is odd
-    function isOdd(number) {
-        return number % 2 !== 0;
     }
 
     // Update Doors Display
@@ -174,14 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Start Game Function
     function startGame(count, knownPos) {
-        // Update numberOfDoors to reflect the current game settings
         numberOfDoors = count;
-
-        // Generate doors and populate known position select
         generateDoors(count);
         populateKnownPositionSelect(count);
 
-        // Assign computer's position
         if (knownPos === 'unknown') {
             computerPosition = getRandomDoor();
             addLog('השק התחיל במיקום לא ידוע.');
@@ -207,8 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         revealBtn.style.display = 'inline-block';
         attemptsCount = 0; // Reset attempts counter
         updateAttempts();
-        doorCountSelect.disabled = true; // Prevent changing door count during active game
-        knownPositionSelect.disabled = true; // Prevent changing known position during active game
+        doorCountSelect.disabled = true;
+        knownPositionSelect.disabled = true;
         updateArrows();
     }
 
@@ -219,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logDiv.innerHTML = '';
         updateDoors();
         updateStatus();
-        attemptsCount = 0; // Reset attempts counter
+        attemptsCount = 0;
         updateAttempts();
         resetBtn.style.display = 'none';
         startBtn.style.display = 'inline-block';
@@ -235,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             revealTimeout = null;
         }
 
-        // Automatically start a new game with last settings
+        // automatically restore last settings
         startGame(lastNumberOfDoors, lastKnownPosition);
     }
 
@@ -259,59 +239,34 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Update last settings
         lastNumberOfDoors = parseInt(selectedDoorCount);
         lastKnownPosition = selectedKnownPosition;
-
-        // Start the game with selected settings
         startGame(lastNumberOfDoors, lastKnownPosition);
     });
 
-    // Event Listener for Door Count Selector to update Known Position Selector dynamically
+    // Door Count change => re-populate knownPositionSelect
     doorCountSelect.addEventListener('change', () => {
         const newCount = parseInt(doorCountSelect.value);
         populateKnownPositionSelect(newCount);
-
-        // If the current known position is greater than the new count, reset it
         if (lastKnownPosition !== 'unknown' && lastKnownPosition > newCount) {
             knownPositionSelect.value = '';
             lastKnownPosition = 'unknown';
         }
     });
 
-    // Get a random door number between 1 and numberOfDoors
+    // Random door
     function getRandomDoor() {
         return Math.floor(Math.random() * numberOfDoors) + 1;
     }
 
-    // Update Positions After Door Click
+    // Update Positions After Door Click (Manual)
     function updatePossiblePositionsAfterClick(pressedDoor) {
         attemptsCount++;
         updateAttempts();
 
         if (pressedDoor === computerPosition) {
-            // The sack has been caught
             addLog(`לחצת על דלת ${pressedDoor}. השק נפל!`);
             doors.forEach(d => d.classList.add('fallen'));
-            gameActive = false;
-            updateStatus();
-            addLog('המשחק הסתיים.');
-            revealBtn.style.display = 'none';
-            leftArrowBtn.disabled = true;
-            rightArrowBtn.disabled = true;
-            leftArrowBtn.classList.remove('enabled');
-            rightArrowBtn.classList.remove('enabled');
-            knownPositionSelect.disabled = false; // Allow changing known position after game ends
-            doorCountSelect.disabled = false;     // Allow changing door count after game ends
-            return;
-        }
-
-        addLog(`לחצת על דלת ${pressedDoor}. השק לא נפל.`);
-
-        // The sack moves based on rules
-        const moves = getPossibleMoves(computerPosition);
-        if (moves.length === 0) {
-            addLog('אין אפשרויות תנועה נוספות. המשחק מסתיים.');
             gameActive = false;
             updateStatus();
             addLog('המשחק הסתיים.');
@@ -325,31 +280,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        addLog(`השק יכול לנוע לדלת ${moves.sort((a, b) => a - b).join(' או ')}`);
+        addLog(`לחצת על דלת ${pressedDoor}. השק לא נפל.`);
 
-        // Randomly choose the next position from possible moves
-        const randomIndex = Math.floor(Math.random() * moves.length);
-        computerPosition = moves[randomIndex];
+        const moves = getPossibleMoves(computerPosition);
+        if (moves.length === 0) {
+            addLog('אין אפשרויות תנועה נוספות. המשחק מסתיים.');
+            gameActive = false;
+            updateStatus();
+            addLog('המשחק הסתיים.');
+            revealBtn.style.display = 'none';
+            leftArrowBtn.disabled = true;
+            rightArrowBtn.disabled = true;
+            knownPositionSelect.disabled = false;
+            doorCountSelect.disabled = false;
+            return;
+        }
+
+        addLog(`השק יכול לנוע לדלת ${moves.sort((a, b) => a - b).join(' או ')}`);
+        // random move
+        const randIdx = Math.floor(Math.random() * moves.length);
+        computerPosition = moves[randIdx];
         addLog(`השק זז לדלת ${computerPosition}.`);
         updateDoors();
         updateStatus();
         updateArrows();
     }
 
-    // Event Listener for Reveal Button
+    // Reveal Button
     revealBtn.addEventListener('click', () => {
         if (!gameActive || computerPosition === null) {
             alert('אין מידע לחשוף. אנא התחל את המשחק.');
             return;
         }
-
-        // Highlight the computer's current door
         const currentDoor = document.querySelector(`.door[data-door="${computerPosition}"]`);
         if (currentDoor) {
             currentDoor.classList.add('revealed');
-
-            // Remove the highlight after 2 seconds
-            revealBtn.disabled = true; // Disable button to prevent multiple clicks
+            revealBtn.disabled = true;
             revealTimeout = setTimeout(() => {
                 currentDoor.classList.remove('revealed');
                 revealBtn.disabled = false;
@@ -357,25 +323,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Event Listener for Change View Button
+    // Change View
     changeViewBtn.addEventListener('click', () => {
         if (isGridView) {
-            // Switch to single-line view
             gridSection.classList.add('single-line');
             changeViewBtn.textContent = 'שנה לתצוגת רשת';
             isGridView = false;
         } else {
-            // Switch back to grid view
             gridSection.classList.remove('single-line');
             changeViewBtn.textContent = 'שנה תצוגה';
             isGridView = true;
         }
     });
 
-    // Function to Update Arrow Buttons Based on Current Position
+    // Update Arrows
     function updateArrows() {
         if (!gameActive || computerPosition === null) {
-            // Disable all arrows
             leftArrowBtn.disabled = true;
             rightArrowBtn.disabled = true;
             leftArrowBtn.classList.remove('enabled');
@@ -386,8 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const possibleMoves = getPossibleMoves(computerPosition);
-        if (possibleMoves.length === 0) {
-            // No moves available
+        if (!possibleMoves.length) {
             leftArrowBtn.disabled = true;
             rightArrowBtn.disabled = true;
             leftArrowBtn.classList.remove('enabled');
@@ -398,15 +360,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (possibleMoves.length === 1) {
-            // Only one possible move, assign to left arrow
             leftArrowBtn.disabled = false;
             leftArrowBtn.classList.add('enabled');
             leftArrowBtn.dataset.target = possibleMoves[0];
             rightArrowBtn.disabled = true;
             rightArrowBtn.classList.remove('enabled');
             rightArrowBtn.dataset.target = '';
-        } else if (possibleMoves.length === 2) {
-            // Two possible moves, assign left and right arrows
+        } else {
             leftArrowBtn.disabled = false;
             leftArrowBtn.classList.add('enabled');
             leftArrowBtn.dataset.target = possibleMoves[0];
@@ -416,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Event Listeners for Arrow Buttons
+    // Move Sack Manually with Arrows
     leftArrowBtn.addEventListener('click', () => {
         if (leftArrowBtn.disabled) return;
         const targetDoor = parseInt(leftArrowBtn.dataset.target);
@@ -429,17 +389,13 @@ document.addEventListener('DOMContentLoaded', () => {
         moveSack(targetDoor, 'right', false);
     });
 
-    // Function to Move the Sack Manually
     function moveSack(targetDoor, direction, shouldLog = true) {
         if (!gameActive || computerPosition === null) return;
-
         const possibleMoves = getPossibleMoves(computerPosition);
         if (!possibleMoves.includes(targetDoor)) {
             alert('תנועה לא חוקית.');
             return;
         }
-
-        // Move the sack
         computerPosition = targetDoor;
         if (shouldLog) {
             addLog(`השק זז לדלת ${computerPosition} (${direction}-arrow).`);
@@ -449,30 +405,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateArrows();
     }
 
-    // Initialize Door Count Selector and Generate Initial Doors
+    // Initialize on page load
     function initializeGame() {
-        // Set default selection if not already set
         if (!doorCountSelect.value) {
-            doorCountSelect.value = '3'; // Default to 3 doors
+            doorCountSelect.value = '3';
         }
-
         numberOfDoors = parseInt(doorCountSelect.value);
         lastNumberOfDoors = numberOfDoors;
-
         generateDoors(numberOfDoors);
         populateKnownPositionSelect(numberOfDoors);
     }
-
-    // Initialize the game on page load
     initializeGame();
 
-    // ===============================
-    // New: Simulation Feature
-    // ===============================
-
+    // ========================================
+    // NEW: SMART SIMULATION
+    // ========================================
     runSimulationBtn.addEventListener('click', () => {
         if (simulationActive) {
-            alert('סימולציה כבר רצה.');
+            alert('סימולציה כבר פעילה.');
             return;
         }
 
@@ -482,13 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const attemptLimit = parseInt(simulationAttemptLimitInput.value);
-        if (isNaN(attemptLimit) || attemptLimit <= 0) {
-            alert('אנא הזן מספר חיובי עבור מגבלת הניסיונות.');
-            return;
-        }
-
-        // Convert the pattern text into an array of door clicks
+        // Parse the pattern
         const lines = patternText.split(/\r?\n/);
         let pattern = [];
         lines.forEach(line => {
@@ -506,25 +450,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Initialize simulation variables
+        // Initialize simulation
         simulationActive = true;
-        simulationCounter = 0;
-        simulationAttemptLimit = attemptLimit;
         simulationPattern = pattern;
-
+        simulationIndex = 0;
+        simulationAttemptsCount = 0;
         simulationStatusP.textContent = 'מצב סימולציה: פעיל';
-        simulationCounterP.textContent = `ספירת הצלחות בסימולציה: ${simulationCounter}`;
+        simulationCounterP.textContent = 'ניסיונות בסימולציה: 0';
 
-        // Start the simulation
-        startSimulation();
+        startSmartSimulation();
     });
 
-    function startSimulation() {
-        if (!simulationActive) return;
+    // Start a new simulation run
+    function startSmartSimulation() {
         resetGameForSimulation();
-        runSimulationRun();
+        // Launch the pattern from index 0
+        playSmartPattern(0);
     }
 
+    // Clear / reset before sim
     function resetGameForSimulation() {
         gameActive = false;
         computerPosition = null;
@@ -544,57 +488,94 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(revealTimeout);
             revealTimeout = null;
         }
-
-        // Start the game with last settings
+        // Start the game with last settings, but we'll override the "movement" logic
         startGame(lastNumberOfDoors, lastKnownPosition);
     }
 
-    function runSimulationRun() {
-        if (!simulationActive) return;
-        startGame(lastNumberOfDoors, lastKnownPosition);
-        playPattern(0);
-    }
-
-    function playPattern(index) {
+    // Recursively play the pattern of door openings
+    function playSmartPattern(idx) {
         if (!simulationActive) return;
         if (!gameActive) {
-            checkSimulationOutcome();
+            // Sack was caught
+            finishSimulation(false);
             return;
         }
-        if (index >= simulationPattern.length) {
-            checkSimulationOutcome();
+        if (idx >= simulationPattern.length) {
+            // Survived all
+            finishSimulation(true);
             return;
         }
 
-        const doorToClick = simulationPattern[index];
-        simulateDoorClick(doorToClick);
-
+        const doorToOpen = simulationPattern[idx];
+        addLog(`(סימולציה) פותחים את דלת ${doorToOpen}`);
+        updatePossiblePositionsAfterSmartClick(doorToOpen, idx);
+        // Move to next
         setTimeout(() => {
-            playPattern(index + 1);
-        }, 100);
+            playSmartPattern(idx + 1);
+        }, 150);
     }
 
-    function simulateDoorClick(doorNum) {
-        if (!gameActive) return;
-        addLog(`(סימולציה) נלחץ על דלת ${doorNum}`);
-        updatePossiblePositionsAfterClick(doorNum);
-    }
+    // "Smart" move logic
+    function updatePossiblePositionsAfterSmartClick(pressedDoor, idxInPattern) {
+        simulationAttemptsCount++; 
+        // We won't reuse attemptsCount for the simulation logic,
+        // because the main game has it as well. We'll keep a separate counter here.
+        simulationCounterP.textContent = `ניסיונות בסימולציה: ${simulationAttemptsCount}`;
 
-    function checkSimulationOutcome() {
-        if (!gameActive && attemptsCount <= simulationAttemptLimit) {
-            simulationCounter++;
-            simulationCounterP.textContent = `ספירת הצלחות בסימולציה: ${simulationCounter}`;
-        }
-
-        if (attemptsCount >= simulationAttemptLimit) {
-            simulationActive = false;
-            simulationStatusP.textContent = `מצב סימולציה: הושלמה (ניסיונות: ${attemptsCount} / מגבלת ניסיונות: ${simulationAttemptLimit})`;
-            addLog('הסימולציה הושלמה.');
+        // Check if the sack is caught
+        if (pressedDoor === computerPosition) {
+            addLog(`נלחץ על דלת ${pressedDoor}. השק נפל!`);
+            doors.forEach(d => d.classList.add('fallen'));
+            gameActive = false;
+            addLog('המשחק הסתיים (סימולציה).');
             return;
         }
+        addLog(`נלחץ על דלת ${pressedDoor}. השק לא נפל.`);
 
-        setTimeout(() => {
-            runSimulationRun();
-        }, 100);
+        // Sack moves SMART:
+        const moves = getPossibleMoves(computerPosition);
+        if (!moves.length) {
+            addLog('אין אפשרויות תנועה נוספות. המשחק מסתיים.');
+            gameActive = false;
+            return;
+        }
+        addLog(`השק יכול לנוע לדלת ${moves.sort((a, b) => a - b).join(' או ')}`);
+
+        // See what the NEXT door is
+        let nextDoor = null;
+        if (idxInPattern + 1 < simulationPattern.length) {
+            nextDoor = simulationPattern[idxInPattern + 1];
+        }
+        const chosenDoor = chooseSmartMove(computerPosition, moves, nextDoor);
+        computerPosition = chosenDoor;
+        addLog(`השק זז לדלת ${computerPosition} (חכם).`);
+        updateDoors();
     }
+
+    // The "smart" move tries to avoid the next door if possible
+    function chooseSmartMove(currentPos, possibleMoves, nextDoor) {
+        if (!nextDoor) {
+            // no next door => just pick randomly
+            return possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+        }
+        // filter out the nextDoor if possible
+        const safeMoves = possibleMoves.filter(m => m !== nextDoor);
+        if (safeMoves.length > 0) {
+            return safeMoves[Math.floor(Math.random() * safeMoves.length)];
+        }
+        // if forced, we must move to nextDoor
+        return nextDoor;
+    }
+
+    function finishSimulation(survived) {
+        simulationActive = false;
+        if (survived) {
+            addLog('הסימולציה הסתיימה: השק שרד את כל הלחיצות!');
+            simulationStatusP.textContent = 'מצב סימולציה: הסתיימה - לא נתפס';
+        } else {
+            addLog(`הסימולציה הסתיימה: השק נתפס לאחר ${simulationAttemptsCount} נסיונות.`);
+            simulationStatusP.textContent = `מצב סימולציה: הסתיימה - נתפס בנסיון ${simulationAttemptsCount}`;
+        }
+    }
+
 });
