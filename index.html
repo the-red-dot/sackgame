@@ -16,27 +16,34 @@
     
     <main>
         <section class="controls">
+            <!-- Added Door Count Selector -->
+            <div class="select-group">
+                <label for="doorCountSelect">בחר מספר דלתות:</label>
+                <select id="doorCountSelect">
+                    <option value="" disabled selected>בחר מספר דלתות</option>
+                    <option value="3">3 דלתות</option>
+                    <option value="4">4 דלתות</option>
+                    <option value="5">5 דלתות</option>
+                    <option value="6">6 דלתות</option>
+                    <option value="7">7 דלתות</option>
+                    <option value="8">8 דלתות</option>
+                    <option value="9">9 דלתות</option>
+                </select>
+            </div>
+            
             <div class="select-group">
                 <label for="knownPositionSelect">בחר מיקום ידוע:</label>
                 <select id="knownPositionSelect">
                     <option value="" disabled selected>בחר דלת</option>
-                    <option value="1">דלת 1</option>
-                    <option value="2">דלת 2</option>
-                    <option value="3">דלת 3</option>
-                    <option value="4">דלת 4</option>
-                    <option value="5">דלת 5</option>
-                    <option value="6">דלת 6</option>
-                    <option value="7">דלת 7</option>
-                    <option value="8">דלת 8</option>
-                    <option value="9">דלת 9</option>
-                    <option value="unknown">מיקום לא ידוע</option>
+                    <!-- Options will be populated dynamically based on door count -->
                 </select>
             </div>
+            
             <div class="button-group">
                 <button id="startBtn" class="btn">התחל משחק</button>
                 <button id="revealBtn" class="btn reveal" style="display:none;">חשוף למשך 2 שניות</button>
                 <button id="changeViewBtn" class="btn change-view">שנה תצוגה</button>
-                <!-- Added Arrow Buttons -->
+                <!-- Arrow Buttons -->
                 <div class="arrow-buttons">
                     <button id="leftArrowBtn" class="btn arrow left-arrow" disabled>→</button>
                     <button id="rightArrowBtn" class="btn arrow right-arrow" disabled>←</button>
@@ -44,16 +51,9 @@
             </div>
         </section>
         
-        <section class="grid">
-            <div class="door" data-door="1">1</div>
-            <div class="door" data-door="2">2</div>
-            <div class="door" data-door="3">3</div>
-            <div class="door" data-door="4">4</div>
-            <div class="door" data-door="5">5</div>
-            <div class="door" data-door="6">6</div>
-            <div class="door" data-door="7">7</div>
-            <div class="door" data-door="8">8</div>
-            <div class="door" data-door="9">9</div>
+        <!-- Modified Grid Section: Removed Static Doors -->
+        <section class="grid" id="doorsGrid">
+            <!-- Doors will be generated dynamically here -->
         </section>
         
         <section id="status" class="status">
