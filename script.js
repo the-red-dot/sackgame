@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ===============================
+    // Existing elements
+    // ===============================
     const doorsGrid = document.getElementById('doorsGrid');
     const doorCountSelect = document.getElementById('doorCountSelect');
     const doors = []; // To store door elements
@@ -16,6 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const leftArrowBtn = document.getElementById('leftArrowBtn');
     const rightArrowBtn = document.getElementById('rightArrowBtn');
 
+    // ===============================
+    // New elements for simulation
+    // ===============================
+    const simulationPatternTextarea = document.getElementById('simulationPattern');
+    const simulationAttemptLimitInput = document.getElementById('simulationAttemptLimit');
+    const runSimulationBtn = document.getElementById('runSimulationBtn');
+    const simulationStatusP = document.getElementById('simulationStatus');
+    const simulationCounterP = document.getElementById('simulationCounter');
+
+    // ===============================
+    // Existing game state variables
+    // ===============================
     let gameActive = false;
     let computerPosition = null; // Internal tracking
     let revealTimeout = null;
@@ -26,6 +41,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variables to store last game settings
     let lastNumberOfDoors = 3;
     let lastKnownPosition = 'unknown';
+
+    // ===============================
+    // New simulation variables
+    // ===============================
+    let simulationActive = false;
+    let simulationCounter = 0; // How many times we've "won" under the attempt limit
+    let simulationAttemptLimit = 17;
+    let simulationPattern = [];
+
+    // ===============================
+    // Functions
+    // ===============================
 
     // Populate Known Position Select based on number of doors
     function populateKnownPositionSelect(count) {
@@ -383,17 +410,17 @@ document.addEventListener('DOMContentLoaded', () => {
     leftArrowBtn.addEventListener('click', () => {
         if (leftArrowBtn.disabled) return;
         const targetDoor = parseInt(leftArrowBtn.dataset.target);
-        moveSack(targetDoor, 'left');
+        moveSack(targetDoor, 'left', false); // Pass false to prevent logging
     });
 
     rightArrowBtn.addEventListener('click', () => {
         if (rightArrowBtn.disabled) return;
         const targetDoor = parseInt(rightArrowBtn.dataset.target);
-        moveSack(targetDoor, 'right');
+        moveSack(targetDoor, 'right', false); // Pass false to prevent logging
     });
 
     // Function to Move the Sack Manually
-    function moveSack(targetDoor, direction) {
+    function moveSack(targetDoor, direction, shouldLog = true) { // Added shouldLog parameter with default true
         if (!gameActive || computerPosition === null) return;
 
         const possibleMoves = getPossibleMoves(computerPosition);
@@ -407,7 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Move the sack
         computerPosition = targetDoor;
-        addLog(`השק זז ידנית לדלת ${computerPosition} (${direction}-arrow).`);
+        if (shouldLog) { // Conditionally log based on shouldLog
+            addLog(`השק זז לדלת ${computerPosition} (${direction}-arrow).`);
+        }
         updateDoors();
         updateStatus();
         updateArrows();
@@ -429,4 +458,191 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the game on page load
     initializeGame();
+
+    // ===============================
+    // New: Simulation Feature
+    // ===============================
+
+    // Event Listener for Run Simulation Button
+    runSimulationBtn.addEventListener('click', () => {
+        if (simulationActive) {
+            alert('סימולציה כבר רצה.');
+            return;
+        }
+
+        // Parse user input
+        const patternText = simulationPatternTextarea.value.trim();
+        if (!patternText) {
+            alert('אנא הזן תבנית סימולציה.');
+            return;
+        }
+
+        const attemptLimit = parseInt(simulationAttemptLimitInput.value);
+        if (isNaN(attemptLimit) || attemptLimit <= 0) {
+            alert('אנא הזן מספר חיובי עבור מגבלת הניסיונות.');
+            return;
+        }
+
+        // Convert the pattern text into an array of door clicks
+        // Support commas and newlines (split by commas & newlines)
+        const lines = patternText.split(/\r?\n/);
+        let pattern = [];
+        lines.forEach(line => {
+            const parts = line.split(',');
+            parts.forEach(p => {
+                const doorNum = parseInt(p.trim());
+                if (!isNaN(doorNum)) {
+                    pattern.push(doorNum);
+                }
+            });
+        });
+
+        if (!pattern.length) {
+            alert('לא נמצאו מספרי דלת תקינים בתבנית.');
+            return;
+        }
+
+        // Initialize simulation variables
+        simulationActive = true;
+        simulationCounter = 0;
+        simulationAttemptLimit = attemptLimit;
+        simulationPattern = pattern;
+
+        simulationStatusP.textContent = 'מצב סימולציה: פעיל';
+        simulationCounterP.textContent = `ספירת הצלחות בסימולציה: ${simulationCounter}`;
+
+        // Start the simulation
+        startSimulation();
+    });
+
+    /**
+     * startSimulation:
+     * Repeatedly runs the game using the given pattern of door clicks,
+     * until the attempt limit is reached. Each time we "win" (find the sack)
+     * in fewer attempts than the limit, increment simulationCounter.
+     */
+    function startSimulation() {
+        if (!simulationActive) return;
+
+        // Reset the game with current settings
+        resetGameForSimulation();
+
+        // Start the simulation run
+        runSimulationRun();
+    }
+
+    /**
+     * resetGameForSimulation:
+     * Resets the game without altering last settings.
+     * Clears the log, resets attempts, etc.
+     */
+    function resetGameForSimulation() {
+        gameActive = false;
+        computerPosition = null;
+        logDiv.innerHTML = '';
+        updateDoors();
+        updateStatus();
+        attemptsCount = 0; // Reset attempts counter
+        updateAttempts();
+        revealBtn.style.display = 'none';
+        leftArrowBtn.disabled = true;
+        rightArrowBtn.disabled = true;
+        leftArrowBtn.classList.remove('enabled');
+        rightArrowBtn.classList.remove('enabled');
+        leftArrowBtn.dataset.target = '';
+        rightArrowBtn.dataset.target = '';
+        if (revealTimeout) {
+            clearTimeout(revealTimeout);
+            revealTimeout = null;
+        }
+
+        // Start the game with last settings
+        startGame(lastNumberOfDoors, lastKnownPosition);
+    }
+
+    /**
+     * runSimulationRun:
+     * Executes the simulation pattern.
+     */
+    function runSimulationRun() {
+        if (!simulationActive) return;
+
+        // Start the game
+        startGame(lastNumberOfDoors, lastKnownPosition);
+
+        // Play the pattern
+        playPattern(0);
+    }
+
+    /**
+     * playPattern:
+     * Executes each door click from 'simulationPattern' in sequence,
+     * with a slight delay between clicks to simulate real-time play.
+     * Once done, checks if we "won" under the attempt limit, increments counters, 
+     * and possibly starts a new run if we haven't reached the limit.
+     */
+    function playPattern(index) {
+        if (!simulationActive) return;
+
+        // If the game ended (e.g., because we found the sack), stop the pattern
+        if (!gameActive) {
+            checkSimulationOutcome();
+            return;
+        }
+
+        // If we've exhausted the pattern, check outcome
+        if (index >= simulationPattern.length) {
+            checkSimulationOutcome();
+            return;
+        }
+
+        // Click the next door in the pattern
+        const doorToClick = simulationPattern[index];
+        // Simulate clicking the door
+        simulateDoorClick(doorToClick);
+
+        // Delay next click for a more "live" feel (optional)
+        setTimeout(() => {
+            playPattern(index + 1);
+        }, 100); // 100ms between clicks
+    }
+
+    /**
+     * simulateDoorClick:
+     * Behaves like the user manually clicked the door.
+     */
+    function simulateDoorClick(doorNum) {
+        // Check if game is still active
+        if (!gameActive) return;
+        addLog(`(סימולציה) נלחץ על דלת ${doorNum}`);
+        updatePossiblePositionsAfterClick(doorNum);
+    }
+
+    /**
+     * checkSimulationOutcome:
+     * Called after we've completed playing the pattern, or the game has ended (found the sack).
+     * If we found the sack under the attempt limit, increment simulationCounter.
+     * If attempts < attemptLimit, do a new run, else stop the simulation.
+     */
+    function checkSimulationOutcome() {
+        // If the game ended and attemptsCount <= attemptLimit, that's a "win"
+        if (!gameActive && attemptsCount <= simulationAttemptLimit) {
+            simulationCounter++;
+            simulationCounterP.textContent = `ספירת הצלחות בסימולציה: ${simulationCounter}`;
+        }
+
+        // If attemptsCount >= simulationAttemptLimit, we stop the simulation
+        if (attemptsCount >= simulationAttemptLimit) {
+            simulationActive = false;
+            simulationStatusP.textContent = `מצב סימולציה: הושלמה (ניסיונות: ${attemptsCount} / מגבלת ניסיונות: ${simulationAttemptLimit})`;
+            addLog('הסימולציה הושלמה.');
+            return;
+        }
+
+        // Otherwise, start a new run
+        // Slight delay to prevent stack overflow
+        setTimeout(() => {
+            runSimulationRun();
+        }, 100); // 100ms delay before next simulation run
+    }
 });

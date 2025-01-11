@@ -338,6 +338,69 @@ footer {
     }
 }
 
+/* Simulation Configuration Section */
+.simulation-config {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    width: 100%;
+    max-width: 450px;
+}
+
+.simulation-config h2 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.simulation-config label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.simulation-config textarea,
+.simulation-config input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.simulation-config textarea:focus,
+.simulation-config input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.simulation-config .button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn.simulation {
+    background-color: #8A2BE2; /* Purple, for example */
+}
+
+.btn.simulation:hover {
+    background-color: #7B1FA2; /* Darker purple */
+}
+
+#simulationStatus,
+#simulationCounter {
+    font-size: 1rem;
+    color: var(--text-color);
+    margin-top: 10px;
+}
+
+
 @media (max-width: 480px) {
     header h1 {
         font-size: 1.5rem;
