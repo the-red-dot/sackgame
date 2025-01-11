@@ -125,19 +125,29 @@ document.addEventListener('DOMContentLoaded', () => {
         logDiv.prepend(p);
     }
 
-    // Get Possible Moves based on Even/Odd Rules
+    /**
+     * UPDATED getPossibleMoves:
+     * The sack can only move exactly 1 door left or right (if possible).
+     */
     function getPossibleMoves(position) {
         const moves = [];
-        const isEvenPos = position % 2 === 0;
-        if (isEvenPos) {
-            // Even position: move to adjacent odd doors
-            if (position > 1 && isOdd(position - 1)) moves.push(position - 1);
-            if (position < numberOfDoors && isOdd(position + 1)) moves.push(position + 1);
-        } else {
-            // Odd position: move to adjacent even doors
-            if (position > 1 && isEven(position - 1)) moves.push(position - 1);
-            if (position < numberOfDoors && isEven(position + 1)) moves.push(position + 1);
+
+        // If position == 1, can only move to 2
+        if (position === 1) {
+            if (numberOfDoors > 1) moves.push(2);
+            return moves;
         }
+
+        // If position == numberOfDoors, can only move to numberOfDoors - 1
+        if (position === numberOfDoors) {
+            if (numberOfDoors > 1) moves.push(numberOfDoors - 1);
+            return moves;
+        }
+
+        // Otherwise, can move to position - 1 and position + 1
+        moves.push(position - 1);
+        moves.push(position + 1);
+
         return moves;
     }
 
@@ -276,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update Positions After Door Click
     function updatePossiblePositionsAfterClick(pressedDoor) {
-        // **Moved attemptsCount++ here to include successes**
         attemptsCount++;
         updateAttempts();
 
@@ -293,12 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
             leftArrowBtn.classList.remove('enabled');
             rightArrowBtn.classList.remove('enabled');
             knownPositionSelect.disabled = false; // Allow changing known position after game ends
-            doorCountSelect.disabled = false; // Allow changing door count after game ends
+            doorCountSelect.disabled = false;     // Allow changing door count after game ends
             return;
         }
 
-        // The sack moves based on rules
         addLog(`לחצת על דלת ${pressedDoor}. השק לא נפל.`);
+
+        // The sack moves based on rules
         const moves = getPossibleMoves(computerPosition);
         if (moves.length === 0) {
             addLog('אין אפשרויות תנועה נוספות. המשחק מסתיים.');
@@ -310,8 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
             rightArrowBtn.disabled = true;
             leftArrowBtn.classList.remove('enabled');
             rightArrowBtn.classList.remove('enabled');
-            knownPositionSelect.disabled = false; // Allow changing known position after game ends
-            doorCountSelect.disabled = false; // Allow changing door count after game ends
+            knownPositionSelect.disabled = false;
+            doorCountSelect.disabled = false;
             return;
         }
 
@@ -343,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
             revealTimeout = setTimeout(() => {
                 currentDoor.classList.remove('revealed');
                 revealBtn.disabled = false;
-            }, 2000); // 2 seconds as per latest requirement
+            }, 2000);
         }
     });
 
@@ -410,17 +420,17 @@ document.addEventListener('DOMContentLoaded', () => {
     leftArrowBtn.addEventListener('click', () => {
         if (leftArrowBtn.disabled) return;
         const targetDoor = parseInt(leftArrowBtn.dataset.target);
-        moveSack(targetDoor, 'left', false); // Pass false to prevent logging
+        moveSack(targetDoor, 'left', false);
     });
 
     rightArrowBtn.addEventListener('click', () => {
         if (rightArrowBtn.disabled) return;
         const targetDoor = parseInt(rightArrowBtn.dataset.target);
-        moveSack(targetDoor, 'right', false); // Pass false to prevent logging
+        moveSack(targetDoor, 'right', false);
     });
 
     // Function to Move the Sack Manually
-    function moveSack(targetDoor, direction, shouldLog = true) { // Added shouldLog parameter with default true
+    function moveSack(targetDoor, direction, shouldLog = true) {
         if (!gameActive || computerPosition === null) return;
 
         const possibleMoves = getPossibleMoves(computerPosition);
@@ -429,12 +439,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // **Removed Attempts Increment Here**
-        // Since arrows should not count as attempts
-
         // Move the sack
         computerPosition = targetDoor;
-        if (shouldLog) { // Conditionally log based on shouldLog
+        if (shouldLog) {
             addLog(`השק זז לדלת ${computerPosition} (${direction}-arrow).`);
         }
         updateDoors();
@@ -463,14 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // New: Simulation Feature
     // ===============================
 
-    // Event Listener for Run Simulation Button
     runSimulationBtn.addEventListener('click', () => {
         if (simulationActive) {
             alert('סימולציה כבר רצה.');
             return;
         }
 
-        // Parse user input
         const patternText = simulationPatternTextarea.value.trim();
         if (!patternText) {
             alert('אנא הזן תבנית סימולציה.');
@@ -484,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Convert the pattern text into an array of door clicks
-        // Support commas and newlines (split by commas & newlines)
         const lines = patternText.split(/\r?\n/);
         let pattern = [];
         lines.forEach(line => {
@@ -515,34 +519,19 @@ document.addEventListener('DOMContentLoaded', () => {
         startSimulation();
     });
 
-    /**
-     * startSimulation:
-     * Repeatedly runs the game using the given pattern of door clicks,
-     * until the attempt limit is reached. Each time we "win" (find the sack)
-     * in fewer attempts than the limit, increment simulationCounter.
-     */
     function startSimulation() {
         if (!simulationActive) return;
-
-        // Reset the game with current settings
         resetGameForSimulation();
-
-        // Start the simulation run
         runSimulationRun();
     }
 
-    /**
-     * resetGameForSimulation:
-     * Resets the game without altering last settings.
-     * Clears the log, resets attempts, etc.
-     */
     function resetGameForSimulation() {
         gameActive = false;
         computerPosition = null;
         logDiv.innerHTML = '';
         updateDoors();
         updateStatus();
-        attemptsCount = 0; // Reset attempts counter
+        attemptsCount = 0;
         updateAttempts();
         revealBtn.style.display = 'none';
         leftArrowBtn.disabled = true;
@@ -560,78 +549,43 @@ document.addEventListener('DOMContentLoaded', () => {
         startGame(lastNumberOfDoors, lastKnownPosition);
     }
 
-    /**
-     * runSimulationRun:
-     * Executes the simulation pattern.
-     */
     function runSimulationRun() {
         if (!simulationActive) return;
-
-        // Start the game
         startGame(lastNumberOfDoors, lastKnownPosition);
-
-        // Play the pattern
         playPattern(0);
     }
 
-    /**
-     * playPattern:
-     * Executes each door click from 'simulationPattern' in sequence,
-     * with a slight delay between clicks to simulate real-time play.
-     * Once done, checks if we "won" under the attempt limit, increments counters, 
-     * and possibly starts a new run if we haven't reached the limit.
-     */
     function playPattern(index) {
         if (!simulationActive) return;
-
-        // If the game ended (e.g., because we found the sack), stop the pattern
         if (!gameActive) {
             checkSimulationOutcome();
             return;
         }
-
-        // If we've exhausted the pattern, check outcome
         if (index >= simulationPattern.length) {
             checkSimulationOutcome();
             return;
         }
 
-        // Click the next door in the pattern
         const doorToClick = simulationPattern[index];
-        // Simulate clicking the door
         simulateDoorClick(doorToClick);
 
-        // Delay next click for a more "live" feel (optional)
         setTimeout(() => {
             playPattern(index + 1);
-        }, 100); // 100ms between clicks
+        }, 100);
     }
 
-    /**
-     * simulateDoorClick:
-     * Behaves like the user manually clicked the door.
-     */
     function simulateDoorClick(doorNum) {
-        // Check if game is still active
         if (!gameActive) return;
         addLog(`(סימולציה) נלחץ על דלת ${doorNum}`);
         updatePossiblePositionsAfterClick(doorNum);
     }
 
-    /**
-     * checkSimulationOutcome:
-     * Called after we've completed playing the pattern, or the game has ended (found the sack).
-     * If we found the sack under the attempt limit, increment simulationCounter.
-     * If attempts < attemptLimit, do a new run, else stop the simulation.
-     */
     function checkSimulationOutcome() {
-        // If the game ended and attemptsCount <= attemptLimit, that's a "win"
         if (!gameActive && attemptsCount <= simulationAttemptLimit) {
             simulationCounter++;
             simulationCounterP.textContent = `ספירת הצלחות בסימולציה: ${simulationCounter}`;
         }
 
-        // If attemptsCount >= simulationAttemptLimit, we stop the simulation
         if (attemptsCount >= simulationAttemptLimit) {
             simulationActive = false;
             simulationStatusP.textContent = `מצב סימולציה: הושלמה (ניסיונות: ${attemptsCount} / מגבלת ניסיונות: ${simulationAttemptLimit})`;
@@ -639,10 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Otherwise, start a new run
-        // Slight delay to prevent stack overflow
         setTimeout(() => {
             runSimulationRun();
-        }, 100); // 100ms delay before next simulation run
+        }, 100);
     }
 });
